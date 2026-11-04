@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Themed-icon layer (Android 13+): the launcher tints this one colour. The dorito is drawn
+    faint and the Y solid, so the shape still reads in a single colour.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M54,80 L31.48,41 L76.52,41 Z"
+        android:fillColor="#59000000"
+        android:strokeColor="#59000000"
+        android:strokeWidth="12"
+        android:strokeLineJoin="round" />
+
+    <path
+        android:pathData="M44,44 L54,56 M64,44 L54,56 L54,68"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+</vector>

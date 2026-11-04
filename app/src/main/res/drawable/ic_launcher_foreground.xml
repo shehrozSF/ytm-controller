@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Launcher icon: a red rounded triangle ("dorito", pointing down) with a white "Y", on a
+    transparent background. The triangle's outer edge stays inside
+    the 66dp safe zone (radius 33 around 54,54), so no launcher mask clips it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+        The dorito: a triangle (circumradius 26 around the centre) filled, plus a 12-wide
+        stroke with round joins in the same gradient, which rounds the corners (radius 6).
+    -->
+    <path
+        android:pathData="M54,80 L31.48,41 L76.52,41 Z"
+        android:strokeWidth="12"
+        android:strokeLineJoin="round">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="35"
+                android:endX="54"
+                android:endY="86"
+                android:startColor="#FFD81B2C"
+                android:endColor="#FF7A0010" />
+        </aapt:attr>
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="35"
+                android:endX="54"
+                android:endY="86"
+                android:startColor="#FFD81B2C"
+                android:endColor="#FF7A0010" />
+        </aapt:attr>
+    </path>
+
+    <!-- Light shadow: the Y again, nudged down, in translucent pale pink, so it shows on the dark red. -->
+    <path
+        android:pathData="M44,45.5 L54,57.5 M64,45.5 L54,57.5 L54,69.5"
+        android:strokeColor="#59FFB3BA"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- The Y: two arms meeting below the centre, then the stem. -->
+    <path
+        android:pathData="M44,44 L54,56 M64,44 L54,56 L54,68"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+</vector>

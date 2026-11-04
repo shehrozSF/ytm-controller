@@ -1,0 +1,23 @@
+.gradle/
+.kotlin/
+build/
+local.properties
+secrets.properties
+# Decompiled third-party code used for research; never publish.
+re/
+# Device logs (contain listening history).
+log.txt
+*.log
+# Built apps and signing keys.
+*.apk
+*.aab
+*.jks
+*.keystore
+# Tool and OS clutter.
+captures/
+.cxx/
+.externalNativeBuild/
+.DS_Store
+Thumbs.db
+*.iml
+.idea/
