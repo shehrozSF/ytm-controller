@@ -1,11 +1,8 @@
 # YTM Controller
 
-A companion app for **YouTube Music on Android**. It sits next to YTM and gives you the
-controls YTM doesn't: a richer Up next, smarter suggestions, adding songs or whole playlists
-by link, and playing merged playlists. It does all of this without replacing YTM.
+A companion app for **YouTube Music on Android**. It sits next to YTM and gives you the controls YTM doesn't: a richer Up next, smarter suggestions, adding songs or whole playlists by link, and playing merged playlists. It does all of this without replacing YTM.
 
-**The app never plays audio itself.** All playback stays in YouTube Music, so your history,
-likes and Recap keep counting as normal.
+**The app never plays audio itself.** All playback stays in YouTube Music, so your history, likes and Recap keep counting as normal.
 
 > Personal project. Not affiliated with or endorsed by Google, YouTube, Samsung, Last.fm,
 > VocaDB or Holodex.
@@ -16,9 +13,7 @@ likes and Recap keep counting as normal.
 
 ### Now playing
 - Shows the current song, artist, cover and progress, with play/pause, next and previous.
-- **Playbar colours match the system media player.** On Samsung (One UI) phones, the
-  background and seek-bar colours are derived from the album art the same way the notification
-  player derives them, including One UI's fixed set of 18 seek-bar colour presets.
+- **Playbar colours match the system media player.** On Samsung (One UI) phones, the background and seek-bar colours are derived from the album art the same way the notification player derives them, including One UI's fixed set of 18 seek-bar colour presets.
 - **Generate radio**: starts a YTM radio from the current song without losing your place in it.
 
 ### Up next
@@ -33,7 +28,7 @@ Two lanes, interleaved:
 
 | Lane | Source | Why |
 |---|---|---|
-| Popular | **YouTube Music radio** for the song | Rich data for Japanese, Vocaloid and VTuber music |
+| Popular | **YouTube Music radio** for the song | Rich data for non-English or cover music |
 | Neutral | **Last.fm** similar songs → **VocaDB** + **Holodex** → Last.fm similar artists | "People who play X also play Y", with niche sources when Last.fm has no data |
 
 - Each row shows which source(s) suggested it. Songs suggested by several sources appear once.
@@ -81,10 +76,8 @@ Works with the official YouTube Music app and with patched builds whose package 
 - The Google sign-in is **read-only** and its token is only ever sent to `www.googleapis.com`.
 - The Holodex API key is only ever sent to `holodex.net`.
 - All network traffic is HTTPS, with timeouts, capped response sizes and no followed redirects.
-- Every ID taken from links, shares or API responses is validated before use. Shared text is
-  parsed, never executed.
-- Thumbnails only load from an allowlist of image hosts (YouTube, Google, Last.fm, VocaDB,
-  NicoNico).
+- Every ID taken from links, shares or API responses is validated before use. Shared text is parsed, never executed.
+- Thumbnails only load from an allowlist of image hosts (YouTube, Google, Last.fm, VocaDB, NicoNico).
 - API keys are kept out of the source tree, in a git-ignored properties file.
 
 ---
@@ -92,21 +85,15 @@ Works with the official YouTube Music app and with patched builds whose package 
 ## Limitations
 
 - **Unofficial endpoints** (YTM search/`next`, `watch_videos`) can change or break without notice.
-- Up next songs are matched to YouTube by title, so occasionally a cover or alternate version
-  is picked instead of the original.
+- Up next songs are matched to YouTube by title, so occasionally a cover or alternate version is picked instead of the original.
 - Inserting into Up next briefly restarts the current song, and trims the queue to 50 songs.
-- Last.fm has little data for many Japanese, Vocaloid and VTuber songs. VocaDB only knows
-  vocal-synth music, and Holodex only covers VTuber channels it indexes.
-- The playbar colour matching follows One UI's media player specifically; other phones'
-  players derive colours differently.
+- Last.fm has little data for many Japanese, Vocaloid and VTuber songs. VocaDB only knows vocal-synth music, and Holodex only covers VTuber channels it indexes.
+- The playbar colour matching follows One UI's media player specifically; other phones' players derive colours differently.
 
 ---
 
 ## Tech
 
-Kotlin · Jetpack Compose (Material 3) · coroutines · `androidx.palette` · Google Play
-Services auth · no third-party HTTP or image libraries (plain `HttpsURLConnection` and
-`BitmapFactory`).
+Kotlin · Jetpack Compose (Material 3) · coroutines · `androidx.palette` · Google Play Services auth · no third-party HTTP or image libraries (plain `HttpsURLConnection` and `BitmapFactory`).
 
-Data sources: YouTube Music (unofficial), YouTube Data API v3, [Last.fm](https://www.last.fm/api),
-[VocaDB](https://vocadb.net), [Holodex](https://holodex.net).
+Data sources: YouTube Music (unofficial), YouTube Data API v3, [Last.fm](https://www.last.fm/api), [VocaDB](https://vocadb.net), [Holodex](https://holodex.net).
