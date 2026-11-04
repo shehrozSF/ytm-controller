@@ -26,6 +26,28 @@ android {
         buildConfigField("String", "HOLODEX_API_KEY", "\"${secrets.getProperty("holodex.apiKey", "")}\"")
     }
 
+    // Release signing, from secrets.properties (release.storeFile / storePassword / keyAlias /
+    // keyPassword). Without them, assembleRelease still works but gives an unsigned APK.
+    val releaseStore = secrets.getProperty("release.storeFile")?.let { file(it) }?.takeIf { it.exists() }
+    signingConfigs {
+        if (releaseStore != null) create("release") {
+            storeFile = releaseStore
+            storePassword = secrets.getProperty("release.storePassword")
+            keyAlias = secrets.getProperty("release.keyAlias")
+            keyPassword = secrets.getProperty("release.keyPassword")
+        }
+    }
+
+    buildTypes {
+        release {
+            // R8: strips unused code/resources and renames what's left (smaller, harder to read).
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
+        }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true

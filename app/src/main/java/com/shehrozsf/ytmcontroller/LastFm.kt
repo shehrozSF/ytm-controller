@@ -135,11 +135,15 @@ object LastFm {
 
     private val coverLookups = Semaphore(4)
 
-    /** Covers already looked up this session ([Cover.Found] or [Cover.None]). */
-    private val covers = java.util.concurrent.ConcurrentHashMap<String, Cover>()
+    /**
+     * Covers already looked up this session ([Cover.Found] or [Cover.None]), newest 500. The
+     * cover images themselves are kept on disk by [Caches], as are Last.fm's responses when
+     * Last.fm marks them cacheable.
+     */
+    private val covers = android.util.LruCache<String, Cover>(500)
 
     /** Instant answer when known, so revisited rows don't flash a loading state. */
-    fun cachedCover(title: String, artist: String): Cover? = covers[songKey(title, artist)]
+    fun cachedCover(title: String, artist: String): Cover? = covers.get(songKey(title, artist))
 
     /**
      * Album cover for a track via `track.getInfo`, the one call that still returns real art.
@@ -148,7 +152,7 @@ object LastFm {
     suspend fun coverArt(title: String, artist: String): Cover {
         if (!hasKey) return Cover.None
         val key = songKey(title, artist)
-        covers[key]?.let { return it }
+        covers.get(key)?.let { return it }
         val cover = try {
             // At most a few at once: a fresh Suggestions list would otherwise fire one per row
             // simultaneously and starve Up next's thumbnails of bandwidth.
@@ -164,7 +168,7 @@ object LastFm {
             Log.w(TAG, "cover lookup failed for \"$title\" / $artist: ${e.message}")
             return Cover.Failed
         }
-        covers[key] = cover
+        covers.put(key, cover)
         return cover
     }
 

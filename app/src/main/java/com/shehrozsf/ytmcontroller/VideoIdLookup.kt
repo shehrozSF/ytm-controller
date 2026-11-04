@@ -4,7 +4,6 @@ import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 
 private const val TAG = "VideoIdLookup"
@@ -32,16 +31,24 @@ internal fun ytmContext(): JSONObject = JSONObject().put(
  * Tries YTM's own (unofficial, free) search first, then the official Data API.
  */
 object VideoIdLookup {
-    private val cache = ConcurrentHashMap<String, String>()
+    /** This session's lookups (newest 500); [Caches] keeps them across restarts too. */
+    private val cache = android.util.LruCache<String, String>(500)
 
     suspend fun find(title: String, artist: String, durationMs: Long): String? {
         val key = "${title.trim()}\u0000${artist.trim()}".lowercase()
-        cache[key]?.let { return it }
+        cache.get(key)?.let { return it }
+        Caches.videoId(key)?.let { saved ->
+            cache.put(key, saved)
+            return saved
+        }
         val id = runCatching { searchYtm(title, artist, durationMs) }
             .onFailure { Log.w(TAG, "YTM search failed", it) }.getOrNull()?.takeIf(::isValidVideoId)
             ?: runCatching { searchDataApi(title, artist) }
                 .onFailure { Log.w(TAG, "Data API search failed", it) }.getOrNull()?.takeIf(::isValidVideoId)
-        return id?.also { cache[key] = it }
+        return id?.also {
+            cache.put(key, it)
+            Caches.putVideoId(key, it)
+        }
     }
 
     private fun titleMatches(candidate: String, wanted: String): Boolean {

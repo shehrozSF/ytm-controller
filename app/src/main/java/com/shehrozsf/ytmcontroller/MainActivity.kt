@@ -93,6 +93,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Caches.install(this)
         val appContext = applicationContext
         VideoIdLookup.accessToken = { GoogleAuth.token(appContext) }
         lifecycleScope.launch {
@@ -124,6 +125,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Caches.flush()
+    }
+
+    /** Android is short on memory: let go of decoded thumbnails (they reload from disk). */
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        ArtworkLoader.trim(level)
     }
 
     /** singleTop: a share while the app is open arrives here instead of a new window. */

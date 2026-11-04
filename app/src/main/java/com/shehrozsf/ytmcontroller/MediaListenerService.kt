@@ -43,6 +43,17 @@ class MediaListenerService : NotificationListenerService() {
         override fun onSessionDestroyed() = detach()
     }
 
+    /** The listener can start without the app's screen (e.g. after a reboot), so set up caches here too. */
+    override fun onCreate() {
+        super.onCreate()
+        Caches.install(this)
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        ArtworkLoader.trim(level)
+    }
+
     override fun onListenerConnected() {
         report("listener connected")
         try {

@@ -43,7 +43,22 @@ object ArtworkLoader {
         // VocaDB thumbnails for songs without a YouTube upload (its own and NicoNico's).
         "static.vocadb.net", "nicovideo.cdn.nimg.jp",
     )
-    private val cache = LruCache<String, Bitmap>(150)
+    /**
+     * Decoded thumbnails in memory, limited by size (KB) rather than count: 1/8 of the app's
+     * memory, at most 32 MB. Downloads are also kept on disk by [Caches], so anything evicted
+     * here reloads from disk instead of the network.
+     */
+    private val cache = object : LruCache<String, Bitmap>(
+        (Runtime.getRuntime().maxMemory() / 1024 / 8).toInt().coerceAtMost(32 * 1024),
+    ) {
+        override fun sizeOf(key: String, value: Bitmap) = value.allocationByteCount / 1024
+    }
+
+    /** Android is short on memory: drop decoded thumbnails (they reload from the disk cache). */
+    fun trim(level: Int) {
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) cache.evictAll()
+        else cache.trimToSize(cache.maxSize() / 2)
+    }
 
     private fun allowedHttps(uri: Uri): Boolean {
         val host = uri.host ?: return false
