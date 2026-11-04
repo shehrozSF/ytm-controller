@@ -78,7 +78,6 @@ Works with the official YouTube Music app and with patched builds whose package 
 - All network traffic is HTTPS, with timeouts, capped response sizes and no followed redirects.
 - Every ID taken from links, shares or API responses is validated before use. Shared text is parsed, never executed.
 - Thumbnails only load from an allowlist of image hosts (YouTube, Google, Last.fm, VocaDB, NicoNico).
-- API keys are kept out of the source tree, in a git-ignored properties file.
 
 ---
 
