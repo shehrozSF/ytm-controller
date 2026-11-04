@@ -165,7 +165,7 @@ object LastFm {
             throw e
         } catch (e: Exception) {
             // Network or API error: not cached, so the row retries next time it appears.
-            Log.w(TAG, "cover lookup failed for \"$title\" / $artist: ${e.message}")
+            Log.w(TAG, "cover lookup failed for \"${logSafe(title)}\" / ${logSafe(artist)}: ${logSafe(e.message)}")
             return Cover.Failed
         }
         covers.put(key, cover)

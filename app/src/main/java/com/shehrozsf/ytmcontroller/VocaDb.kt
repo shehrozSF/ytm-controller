@@ -41,7 +41,7 @@ object VocaDb {
         val mixed = (0 until maxOf(like.size, tag.size)).flatMap { listOfNotNull(like.getOrNull(it), tag.getOrNull(it)) } + byArtist
         val current = normalizeTitle(cleanTitle(title))
         val out = mixed.filter { normalizeTitle(it.title) != current }.distinctBy { it.artist to it.title }.take(limit)
-        Log.i(TAG, "\"$title\" → VocaDB #${song.optInt("id")}: ${like.size} liked, ${tag.size} tag, ${byArtist.size} artist")
+        Log.i(TAG, "\"${logSafe(title)}\" → VocaDB #${song.optInt("id")}: ${like.size} liked, ${tag.size} tag, ${byArtist.size} artist")
         return out
     }
 
@@ -56,7 +56,7 @@ object VocaDb {
             names(song).any { it == wanted }
         }
         if (candidates.isEmpty()) {
-            Log.i(TAG, "\"$query\" not on VocaDB")
+            Log.i(TAG, "\"${logSafe(query)}\" not on VocaDB")
             return null
         }
         // Several songs can share a title; prefer the one whose credits mention the artist.

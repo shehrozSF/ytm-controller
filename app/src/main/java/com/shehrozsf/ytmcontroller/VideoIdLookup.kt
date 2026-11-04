@@ -86,8 +86,8 @@ object VideoIdLookup {
         val match = titled.firstOrNull { it.durationMs != null && abs(it.durationMs - durationMs) <= 3_000 }
             ?: titled.firstOrNull { it.durationMs == null || durationMs <= 0 }
         if (match == null) {
-            Log.i(TAG, "no match for \"$title\" (${durationMs}ms, filter=$params) among: " +
-                candidates.joinToString { "\"${it.title}\" ${it.durationMs}ms" })
+            Log.i(TAG, "no match for \"${logSafe(title)}\" (${durationMs}ms, filter=$params) among: " +
+                logSafe(candidates.joinToString { "\"${it.title}\" ${it.durationMs}ms" }, 600))
         }
         return match?.videoId
     }

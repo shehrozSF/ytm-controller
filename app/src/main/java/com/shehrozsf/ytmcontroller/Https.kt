@@ -147,5 +147,20 @@ internal suspend fun httpsRedirectTarget(url: String): String? = withContext(Dis
     }
 }
 
+/**
+ * Makes untrusted text (song titles, API error messages…) safe to log: control characters
+ * and line/paragraph separators become spaces, so a crafted title can't forge extra log
+ * lines, and long values are cut short.
+ */
+private const val LINE_SEPARATOR = 0x2028      // Unicode line separator
+private const val PARAGRAPH_SEPARATOR = 0x2029 // Unicode paragraph separator
+
+internal fun logSafe(s: Any?, max: Int = 120): String {
+    val clean = s?.toString().orEmpty()
+        .map { if (it.isISOControl() || it.code == LINE_SEPARATOR || it.code == PARAGRAPH_SEPARATOR) ' ' else it }
+        .joinToString("")
+    return if (clean.length > max) clean.take(max) + "…" else clean
+}
+
 /** Letters and digits only (any script), so "Bunny Girl / 輪堂千速（cover）" compares reliably. */
 internal fun normalizeTitle(s: String) = s.lowercase().filter(Char::isLetterOrDigit)

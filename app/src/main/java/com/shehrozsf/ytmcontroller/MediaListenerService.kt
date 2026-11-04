@@ -95,7 +95,8 @@ class MediaListenerService : NotificationListenerService() {
         val state = c.playbackState ?: return
         val supported = ACTION_NAMES.filterKeys { state.actions and it != 0L }.values
         Log.i(TAG, "actions: $supported")
-        Log.i(TAG, "customActions: ${state.customActions.map { "${it.action} (${it.name})" }}")
+        // Action names come from another app's session: sanitise before logging.
+        Log.i(TAG, "customActions: ${logSafe(state.customActions.map { "${it.action} (${it.name})" }, 500)}")
     }
 
     private fun detach() {
@@ -105,7 +106,7 @@ class MediaListenerService : NotificationListenerService() {
     }
 
     private fun report(message: String) {
-        Log.i(TAG, message)
+        Log.i(TAG, logSafe(message, 300))
         NowPlaying.status.value = message
     }
 }

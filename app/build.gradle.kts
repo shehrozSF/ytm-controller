@@ -57,6 +57,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    // JVM unit tests (app/src/test): Android framework calls return defaults instead of
+    // throwing, so plain-Kotlin logic in classes that also touch Android can still load.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 val resourceChecksum = "4e172a64cdc20117930a59c4387feffebb07c1e7ca78f0120bad1207b065c308"
 
@@ -80,4 +86,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:22.0.0")
     // Album-art colours for the playbar (a port of One UI's media-player extractor).
     implementation("androidx.palette:palette-ktx:1.0.0")
+
+    testImplementation("junit:junit:4.13.2")
 }

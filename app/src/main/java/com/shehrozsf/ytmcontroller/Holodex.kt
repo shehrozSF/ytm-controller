@@ -62,7 +62,7 @@ object Holodex {
             .filter { it.videoId != videoId }
             .distinctBy { it.videoId }
             .take(limit)
-        Log.i(TAG, "$videoId → channel $channelId (org=$org): ${ownVideos.size} own, ${agencyVideos.size} agency")
+        Log.i(TAG, "$videoId → channel ${logSafe(channelId)} (org=${logSafe(org)}): ${ownVideos.size} own, ${agencyVideos.size} agency")
         if (out.isEmpty()) Log.i(TAG, "no music videos found; check MUSIC_TOPICS ids $MUSIC_TOPICS")
         out
     }

@@ -1,6 +1,5 @@
 package com.shehrozsf.ytmcontroller
 
-import android.net.Uri
 import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -45,9 +44,6 @@ object QueueEditor {
     /** watch_videos' limit. */
     private const val MAX_SONGS = 50
 
-    private val YOUTUBE_HOSTS = setOf("youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com")
-    private val URL = Regex("https?://\\S+")
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val lookups = Semaphore(6)
 
@@ -69,19 +65,7 @@ object QueueEditor {
     }
 
     /** Parses the first YouTube / YTM / youtu.be link in [text]; null if there isn't one. */
-    fun parseLink(text: String): LinkTarget? {
-        val uri = Uri.parse(URL.find(text)?.value ?: text.trim())
-        if (uri.scheme != "https" && uri.scheme != "http") return null
-        val host = uri.host?.lowercase() ?: return null
-        val video = when {
-            host == "youtu.be" -> uri.pathSegments.firstOrNull()
-            host in YOUTUBE_HOSTS && uri.pathSegments.firstOrNull() == "shorts" -> uri.pathSegments.getOrNull(1)
-            host in YOUTUBE_HOSTS -> uri.getQueryParameter("v")
-            else -> return null
-        }?.takeIf(::isValidVideoId)
-        val list = uri.getQueryParameter("list")?.takeIf(YtmWatch::isValidPlaylistId)
-        return if (video == null && list == null) null else LinkTarget(video, list)
-    }
+    fun parseLink(text: String): LinkTarget? = LinkParser.parse(text)
 
     /** Adds [target] (the whole playlist if [wholePlaylist], else just the song) at [at]. */
     fun insert(target: LinkTarget, wholePlaylist: Boolean, at: InsertAt) {

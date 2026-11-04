@@ -36,6 +36,9 @@ import kotlinx.coroutines.withContext
 object ArtworkLoader {
     private const val TARGET_PX = 160
     private const val MAX_BYTES = 2 * 1024 * 1024
+    /** Larger than any real cover (8K × 8K); anything beyond is treated as hostile. */
+    private const val MAX_SOURCE_PIXELS = 64L * 1024 * 1024
+    private const val MAX_DECODED_SIDE = 640
     private val ALLOWED_HOSTS = listOf(
         "ytimg.com", "ggpht.com", "googleusercontent.com",
         // Last.fm's image CDNs (suggestion covers).
@@ -89,13 +92,26 @@ object ArtworkLoader {
         return withContext(Dispatchers.Default) { decodeSmall(bytes) }?.also { cache.put(uriString, it) }
     }
 
+    /**
+     * Decodes untrusted image bytes at thumbnail size. A tiny file can claim huge dimensions
+     * ("decompression bomb"), so the header is read first: absurd sizes are rejected, and the
+     * sample factor shrinks until *both* sides are small, not just the shorter one.
+     */
     private fun decodeSmall(bytes: ByteArray): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val w = bounds.outWidth
+        val h = bounds.outHeight
+        if (w <= 0 || h <= 0 || w.toLong() * h > MAX_SOURCE_PIXELS) return null
         var sample = 1
-        while (minOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= TARGET_PX) sample *= 2
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+        while (minOf(w, h) / (sample * 2) >= TARGET_PX || maxOf(w, h) / sample > MAX_DECODED_SIDE) sample *= 2
+        return BitmapFactory.decodeByteArray(
+            bytes, 0, bytes.size,
+            BitmapFactory.Options().apply {
+                inSampleSize = sample
+                inPreferredConfig = Bitmap.Config.RGB_565 // thumbnails: half the memory, no visible loss
+            },
+        )
     }
 }
 

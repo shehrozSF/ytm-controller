@@ -66,6 +66,32 @@ back to where it was. The rebuilt queue holds at most 50 songs.
 Works with the official YouTube Music app and with patched builds whose package name ends in
 `.youtube.music`.
 
+### Architecture
+
+```mermaid
+flowchart LR
+    YTM["YouTube Music app"] -- media session --> Listener["MediaListenerService"]
+    Listener --> NowPlaying["NowPlaying<br/>(StateFlows)"]
+    NowPlaying --> UI["Compose UI<br/>(MainActivity)"]
+    UI -- controls --> NowPlaying -- transport controls --> YTM
+
+    UI --> Feed["SuggestionFeed"]
+    Feed --> Radio["YtmWatch<br/>(radio / playlists)"]
+    Feed --> LastFm["Last.fm"]
+    Feed --> VocaDb["VocaDB"]
+    Feed --> Holodex["Holodex"]
+
+    UI --> Queue["QueueEditor / MergePlayer"]
+    Queue --> Lookup["VideoIdLookup"]
+    Queue -- temporary playlist --> NowPlaying
+
+    Radio & LastFm & VocaDb & Holodex & Lookup --> Https["Https<br/>(single network layer)"]
+    Https --> Cache[("Caches<br/>disk + memory")]
+```
+
+Every network call goes through one small layer (`Https.kt`) that enforces the security rules
+below, so no feature can bypass them.
+
 ---
 
 ## Privacy and security
@@ -75,8 +101,22 @@ Works with the official YouTube Music app and with patched builds whose package 
 - The Google sign-in is **read-only** and its token is only ever sent to `www.googleapis.com`.
 - The Holodex API key is only ever sent to `holodex.net`.
 - All network traffic is HTTPS, with timeouts, capped response sizes and no followed redirects.
-- Every ID taken from links, shares or API responses is validated before use. Shared text is parsed, never executed.
+- **Injection-resistant input handling:**
+  - Every ID taken from links, shares or API responses must match a strict pattern before
+    it reaches a URL or intent; everything else in the input is discarded.
+  - Shared links are parsed by a pure, unit-tested parser that rejects other hosts,
+    `user@host` and port tricks, non-web schemes and percent-encoded payloads.
+  - Query values are URL-encoded and JSON bodies are built with a JSON library, never by
+    string concatenation.
+  - Shared text is only parsed, never acted on without the user confirming in a dialog.
+- **Log-injection safe:** untrusted text (titles, API errors) is stripped of line breaks and
+  control characters before logging, and release builds remove info/debug logging entirely.
+- **Decompression-bomb safe:** image headers are checked first; absurd dimensions are
+  rejected and thumbnails are decoded at a bounded size.
 - Thumbnails only load from an allowlist of image hosts (YouTube, Google, Last.fm, VocaDB, NicoNico).
+- **No data leaves the device:** cloud backup and device-to-device transfer are disabled,
+  cleartext HTTP is disallowed, and saved lookups store hashed song keys, not titles.
+- Release builds are shrunk and obfuscated with R8.
 
 ---
 
@@ -87,6 +127,20 @@ Works with the official YouTube Music app and with patched builds whose package 
 - Inserting into Up Next briefly restarts the current song, and trims the queue to 50 songs.
 - Last.fm has little data for many Japanese, Vocaloid and VTuber songs. VocaDB only knows vocal-synth music, and Holodex only covers VTuber channels it indexes.
 - The playbar colour matching follows One UI's media player specifically; other phones' players derive colours differently.
+
+---
+
+## Testing
+
+JVM unit tests (`app/src/test`) cover the security-critical and logic-heavy parts:
+
+| Suite | Covers |
+|---|---|
+| `LinkParserTest` | Accepted link forms, and rejection of spoofed hosts, `user@host`, ports, `javascript:`/`intent:`/`file:` schemes, percent-encoded injection, path traversal and oversized input |
+| `ValidationTest` | Video/playlist ID validation, log sanitising, title normalisation, VocaDB title cleaning |
+| `SuggestionMergeTest` | Lane interleaving, de-duplication across sources, cover/video precedence, per-artist caps, cover detection |
+
+Run them with `./gradlew testDebugUnitTest`.
 
 ---
 

@@ -84,13 +84,6 @@ object NowPlaying {
             _track.value = null
             return
         }
-        Log.i(
-            TAG,
-            "art: ART=${m.getBitmap(MediaMetadata.METADATA_KEY_ART)?.let { "${it.width}x${it.height}" }}" +
-                " ALBUM_ART=${m.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)?.let { "${it.width}x${it.height}" }}" +
-                " ART_URI=${m.getString(MediaMetadata.METADATA_KEY_ART_URI)}" +
-                " ALBUM_ART_URI=${m.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI)}",
-        )
         val track = Track(
             title = m.getString(MediaMetadata.METADATA_KEY_TITLE).orEmpty(),
             artist = m.getString(MediaMetadata.METADATA_KEY_ARTIST).orEmpty(),

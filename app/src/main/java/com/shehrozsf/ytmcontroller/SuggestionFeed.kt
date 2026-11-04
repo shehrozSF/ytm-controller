@@ -59,12 +59,15 @@ object SuggestionFeed {
         }
 
         val seedTitle = normalizeTitle(title)
-        val ytmItems = ytm.items.filterNot { isVersionOf(it.title, seedTitle) }.capPerArtist(MAX_PER_ARTIST_YTM)
-        val neutralItems = neutral.items.filterNot { isVersionOf(it.title, seedTitle) }
+        val ytmItems = SuggestionMerge.capPerArtist(
+            ytm.items.filterNot { SuggestionMerge.isVersionOf(it.title, seedTitle) },
+            MAX_PER_ARTIST_YTM,
+        )
+        val neutralItems = neutral.items.filterNot { SuggestionMerge.isVersionOf(it.title, seedTitle) }
 
-        val items = interleave(ytmItems, neutralItems).take(LIMIT)
+        val items = SuggestionMerge.interleave(ytmItems, neutralItems).take(LIMIT)
         val basis = steps.joinToString(" · ") { it.describe() }
-        Log.i(TAG, "\"$title\" / $artist: ${items.size} suggestions. $basis")
+        Log.i(TAG, "\"${logSafe(title)}\" / ${logSafe(artist)}: ${items.size} suggestions. ${logSafe(basis, 300)}")
 
         Suggestions(items, basis).also {
             // A source that failed should retry next time, so only cache complete answers.
@@ -98,7 +101,7 @@ object SuggestionFeed {
             steps += vocaStep
             steps += holoStep
             // Row by row, so neither buries the other.
-            val niche = interleave(vocaStep.items, holoStep.items)
+            val niche = SuggestionMerge.interleave(vocaStep.items, holoStep.items)
             if (niche.isNotEmpty()) return@coroutineScope Lane(steps, niche)
 
             if (!LastFm.hasKey) return@coroutineScope Lane(steps, emptyList())
@@ -113,20 +116,27 @@ object SuggestionFeed {
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        Log.w(TAG, "source failed: ${e.message}")
+        Log.w(TAG, "source failed: ${logSafe(e.message)}")
         Result.failure(e)
     }
+}
 
+/**
+ * The pure list logic behind [SuggestionFeed]: no network or Android types, so it's
+ * unit-tested on the JVM.
+ */
+internal object SuggestionMerge {
     /** Another upload, cover or live take of the current song (YTM radios are full of them). */
-    private fun isVersionOf(candidate: String, seedNormalized: String): Boolean {
+    fun isVersionOf(candidate: String, seedNormalized: String): Boolean {
         val c = normalizeTitle(candidate)
         if (c.length < 4 || seedNormalized.length < 4) return c == seedNormalized
         return c.contains(seedNormalized) || seedNormalized.contains(c)
     }
 
-    private fun List<Suggestion>.capPerArtist(max: Int): List<Suggestion> {
+    /** Keeps at most [max] songs per artist (case-insensitive), in order. */
+    fun capPerArtist(items: List<Suggestion>, max: Int): List<Suggestion> {
         val counts = HashMap<String, Int>()
-        return filter { s ->
+        return items.filter { s ->
             val k = s.artist.lowercase().trim()
             val n = counts.getOrDefault(k, 0)
             counts[k] = n + 1
@@ -139,7 +149,7 @@ object SuggestionFeed {
      * gains the other sources. Whenever YT Music is one of them, its cover and video win
      * (it's the actual YTM track); otherwise missing ones are filled from the other row.
      */
-    private fun interleave(a: List<Suggestion>, b: List<Suggestion>): List<Suggestion> {
+    fun interleave(a: List<Suggestion>, b: List<Suggestion>): List<Suggestion> {
         val out = LinkedHashMap<String, Suggestion>()
         for (i in 0 until maxOf(a.size, b.size)) {
             for (s in listOfNotNull(a.getOrNull(i), b.getOrNull(i))) {
