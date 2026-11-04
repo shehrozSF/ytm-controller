@@ -4,8 +4,7 @@ A companion app for **YouTube Music on Android**. It sits next to YTM and gives 
 
 **The app never plays audio itself.** All playback stays in YouTube Music, so your history, likes and Recap keep counting as normal.
 
-> Personal project. Not affiliated with or endorsed by Google, YouTube, Samsung, Last.fm,
-> VocaDB or Holodex.
+> Personal project. Not affiliated with or endorsed by Google, YouTube, Samsung, Last.fm, VocaDB or Holodex.
 
 ---
 
