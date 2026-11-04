@@ -85,7 +85,7 @@ Works with the official YouTube Music app and with patched builds whose package 
 
 - **Unofficial endpoints** (YTM search/`next`, `watch_videos`) can change or break without notice.
 - Up next songs are matched to YouTube by title, so occasionally a cover or alternate version is picked instead of the original.
-- Inserting into Up next briefly restarts the current song, and trims the queue to 50 songs.
+- Inserting into Up Next briefly restarts the current song, and trims the queue to 50 songs.
 - Last.fm has little data for many Japanese, Vocaloid and VTuber songs. VocaDB only knows vocal-synth music, and Holodex only covers VTuber channels it indexes.
 - The playbar colour matching follows One UI's media player specifically; other phones' players derive colours differently.
 
